@@ -1,0 +1,28 @@
+name: Update Cargo.lock
+on:
+  workflow_dispatch:
+
+jobs:
+  update-cargo-lock:
+    name: Update Cargo.lock file
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./compiler
+    steps:
+          steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.64.0
+          override: true
+     - name: Update npm packages
+       uses: technote-space/create-pr-action@v2
+       with:
+          EXECUTE_COMMANDS: |
+            cargo check
+         COMMIT_MESSAGE: 'Update Cargo.lock'
+         COMMIT_NAME: 'GitHub Actions'
+         PR_BRANCH_NAME: 'update-cargo.lock-${PR_ID}'
+         PR_TITLE: 'Update Cargo.lock'
+
