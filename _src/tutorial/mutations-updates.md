@@ -71,7 +71,7 @@ export default function Story({story}: Props) {
 }
 ```
 
-Now let’s take a look at `StoryLikeButton.js`. Currently, it is a button that doesn’t do anything, along with a like count.
+Now let’s take a look at `StoryLikeButton.tsx`. Currently, it is a button that doesn’t do anything, along with a like count.
 
 ![Like button](/img/docs/tutorial/mutations-like-button.png)
 
@@ -359,7 +359,7 @@ function StoryLikeButton({story}) {
         const {
           // color1
           updatableData
-        } = store.readUpdatableFragment(
+        } = store.readUpdatableFragment<StoryLikeButton_updatable$key>(
           // color2
           fragment,
           // color3
@@ -384,7 +384,11 @@ function StoryLikeButton({story}) {
             doesViewerLike
           }
         `;
-        const {updatableData} = store.readUpdatableFragment(fragment, story);
+        const { updatableData } =
+          store.readUpdatableFragment<StoryLikeButton_updatable$key>(
+            fragment,
+            story
+          );
         // change
         const alreadyLikes = updatableData.doesViewerLike;
         updatableData.doesViewerLike = !alreadyLikes;
@@ -447,7 +451,7 @@ We should now see a composer at the top of the comments section:
 
 ![Comments composer screenshot](/img/docs/tutorial/mutations-comments-composer-screenshot.png)
 
-Now take a look inside `StoryCommentsComposer.js`:
+Now take a look inside `StoryCommentsComposer.tsx`:
 
 ```
 function StoryCommentsComposer({story}) {
@@ -571,7 +575,7 @@ export default function StoryCommentsComposer({story}: Props) {
     // change
     const connectionID = ConnectionHandler.getConnectionID(
       data.id,
-      'StoryCommentsSection_comments',
+      'StoryCommentsSectionFragment_comments',
     );
     // end-change
     commitMutation({

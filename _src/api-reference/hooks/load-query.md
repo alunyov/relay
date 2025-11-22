@@ -56,7 +56,7 @@ const queryReference = loadQuery(
 * `query`: GraphQL query to fetch, specified using a `graphql` template literal, or a preloadable concrete request, which can be acquired by requiring the file `<name-of-query>$Parameters.graphql`. Relay will only generate the `$Parameters` file if the query is annotated with `@preloadable`.
 * `variables`: Object containing the variable values to fetch the query. These variables need to match GraphQL variables declared inside the query.
 * `options`: *_[Optional]_* options object
-    * `fetchPolicy`: Determines if cached data should be used, and whether to send a network request based on the cached data that is currently available in the Relay store (for more details, see our [Fetch Policies](../../guided-tour/reusing-cached-data/fetch-policies) and [Garbage Collection](../../guided-tour/reusing-cached-data/availability-of-data) guides):
+    * `fetchPolicy`: Determines if cached data should be used, and whether to send a network request based on the cached data that is currently available in the Relay store (for more details, see our [Fetch Policies](../../guided-tour/reusing-cached-data/fetch-policies) and [Garbage Collection](../../guided-tour/reusing-cached-data/presence-of-data) guides):
         * "store-or-network": **(default)** *will* reuse locally cached data and will *only* send a network request if any data for the query is missing. If the query is fully cached, a network request will *not* be made.
         * "store-and-network": *will* reuse locally cached data and will *always* send a network request, regardless of whether any data was missing from the local cache or not.
         * "network-only": *will not* reuse locally cached data, and will *always* send a network request to fetch the query, ignoring any data that might be locally cached in Relay.
@@ -75,7 +75,7 @@ The exact format of the return value is *unstable and highly likely to change*. 
 ### Behavior
 
 * `loadQuery()` will fetch data if passed a query, or data and the query if passed a preloadable concrete request. Once both the query and data are available, the data from the query will be written to the store. This differs from the behavior of `preloadQuery_DEPRECATED`, which would only write data to the store if the query was passed to `usePreloadedQuery`.
-* the query reference returned from `loadQuery` will be retained by the relay store, preventing it the data from being garbage collected. Once you call `.dispose()` on the query reference, it can be garbage collected.
+* the query reference returned from `loadQuery` will be retained by the Relay store, preventing the data from being garbage collected. Once you call `.dispose()` on the query reference, it can be garbage collected.
 * `loadQuery()` will throw an error if it is called during React's render phase.
 
 
