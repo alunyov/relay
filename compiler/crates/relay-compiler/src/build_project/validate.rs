@@ -36,6 +36,7 @@ use relay_transforms::validate_unused_fragment_variables;
 use relay_transforms::validate_unused_variables;
 use relay_transforms::validate_updatable_directive;
 use relay_transforms::validate_updatable_fragment_spread;
+use relay_transforms::validate_writable_directive;
 
 pub type AdditionalValidations =
     Box<dyn Fn(&Program, &ProjectConfig) -> DiagnosticsResult<()> + Sync + Send>;
@@ -90,6 +91,7 @@ pub fn validate(
         validate_updatable_directive(program),
         validate_updatable_fragment_spread(program),
         validate_assignable_directive(program),
+        validate_writable_directive(program),
         validate_resolver_fragments(program),
         disallow_readtime_features_in_mutations(
             program,

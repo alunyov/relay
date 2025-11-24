@@ -1,0 +1,8 @@
+fragment UserWithProfile on User @writable {
+  name
+  profilePicture {
+    uri
+    width
+    height
+  }
+}

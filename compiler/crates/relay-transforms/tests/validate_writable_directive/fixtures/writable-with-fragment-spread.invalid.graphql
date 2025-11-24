@@ -1,0 +1,10 @@
+# expected-to-throw
+fragment UserFields on User @writable {
+  id
+  name
+  ...OtherFragment
+}
+
+fragment OtherFragment on User {
+  email
+}

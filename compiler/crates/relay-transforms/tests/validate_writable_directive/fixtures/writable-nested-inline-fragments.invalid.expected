@@ -1,0 +1,21 @@
+==================================== INPUT ====================================
+# expected-to-throw
+fragment NodeFields on Node @writable {
+  id
+  ... on User {
+    __typename
+    name
+    ... on Actor {
+      __typename
+      username
+    }
+  }
+}
+==================================== ERROR ====================================
+✖︎ Nested inline fragments are not allowed within @writable fragments.
+
+  writable-nested-inline-fragments.invalid.graphql:2:10
+    1 │ # expected-to-throw
+    2 │ fragment NodeFields on Node @writable {
+      │          ^^^^^^^^^^
+    3 │   id

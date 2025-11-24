@@ -238,6 +238,7 @@ export type {
   UpdatableQuery,
   Variables,
   VariablesOf,
+  WritableFragment,
 } from './util/RelayRuntimeTypes';
 export type {Local3DPayload} from './util/createPayloadFor3DField';
 export type {Direction} from './util/getPaginationVariables';

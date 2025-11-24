@@ -1,0 +1,30 @@
+==================================== INPUT ====================================
+# expected-to-throw
+fragment NodeFields on Node @writable {
+  id
+  ... on User {
+    __typename
+    name
+    actorCount
+  }
+  ... on Page {
+    __typename
+    canViewerComment
+  }
+}
+==================================== ERROR ====================================
+✖︎ Within @writable fragments, all inline fragments must refine to the same concrete type. Found inline fragments refining to `User` and `Page`.
+
+  writable-with-inline-fragments.invalid.graphql:9:3
+    8 │   }
+    9 │   ... on Page {
+      │   ^^^
+   10 │     __typename
+
+  ℹ︎ First inline fragment type was encountered here:
+
+  writable-with-inline-fragments.invalid.graphql:4:3
+    3 │   id
+    4 │   ... on User {
+      │   ^^^
+    5 │     __typename

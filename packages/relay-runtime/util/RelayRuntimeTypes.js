@@ -108,6 +108,15 @@ declare export opaque type UpdatableFragment<
 >: ReaderFragment;
 
 /**
+ * Return type of graphql tag literals for writable fragments.
+ * Writable fragments support arguments and provide type-safe imperative store updates.
+ */
+declare export opaque type WritableFragment<
+  TFragmentType,
+  +TData,
+>: ReaderFragment;
+
+/**
  * Return type of graphql tag literals for queries.
  */
 declare export opaque type Query<

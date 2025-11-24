@@ -365,6 +365,17 @@ directive @assignable on FRAGMENT_DEFINITION
 """
 (Relay Only)
 
+Marks a given fragment as writable, enabling type-safe imperative store updates
+with fragment-based APIs. Writable fragments support arguments but do not allow
+fragment spreads or conditional directives (@include, @skip).
+
+[Read More](https://relay.dev/docs/guided-tour/updating-data/imperatively-modifying-store/)
+"""
+directive @writable on FRAGMENT_DEFINITION
+
+"""
+(Relay Only)
+
 Exposes a fragment's data as a new field which can be null checked to ensure it
 matches the parent selection.
 

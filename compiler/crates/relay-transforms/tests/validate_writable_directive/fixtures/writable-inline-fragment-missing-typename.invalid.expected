@@ -1,0 +1,18 @@
+==================================== INPUT ====================================
+# expected-to-throw
+fragment NodeFields on Node @writable {
+  id
+  ... on User {
+    name
+    email
+  }
+}
+==================================== ERROR ====================================
+✖︎ The type `User` has no field `email`.
+See https://relay.dev/docs/error-reference/unknown-field/
+
+  writable-inline-fragment-missing-typename.invalid.graphql:6:5
+    5 │     name
+    6 │     email
+      │     ^^^^^
+    7 │   }

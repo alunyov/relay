@@ -100,6 +100,7 @@ crates/relay-transforms/tests/validate_client_schema_extensions_use_catch
 crates/relay-transforms/tests/validate_server_only_directives
 crates/relay-transforms/tests/validate_static_args
 crates/relay-transforms/tests/validate_unused_variables
+crates/relay-transforms/tests/validate_writable_directive
 crates/relay-transforms/tests/updatable_directive
 crates/relay-transforms/tests/updatable_fragment_spread
 crates/relay-typegen/tests/generate_flow

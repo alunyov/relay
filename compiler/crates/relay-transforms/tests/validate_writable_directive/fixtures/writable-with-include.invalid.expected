@@ -1,0 +1,16 @@
+==================================== INPUT ====================================
+# expected-to-throw
+fragment UserFields on User @writable {
+  id
+  name @include(if: $includeIt)
+  email
+}
+==================================== ERROR ====================================
+✖︎ The type `User` has no field `email`.
+See https://relay.dev/docs/error-reference/unknown-field/
+
+  writable-with-include.invalid.graphql:5:3
+    4 │   name @include(if: $includeIt)
+    5 │   email
+      │   ^^^^^
+    6 │ }

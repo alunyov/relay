@@ -30,6 +30,7 @@ import type {
   UpdatableFragment,
   UpdatableQuery,
   Variables,
+  WritableFragment,
 } from '../util/RelayRuntimeTypes';
 import type RelayRecordSourceMutator from './RelayRecordSourceMutator';
 
@@ -38,6 +39,7 @@ const {EXISTENT, NONEXISTENT} = require('../store/RelayRecordState');
 const {ROOT_ID, ROOT_TYPE} = require('../store/RelayStoreUtils');
 const {readUpdatableFragment} = require('./readUpdatableFragment');
 const {readUpdatableQuery} = require('./readUpdatableQuery');
+const {readWritableFragment} = require('./readWritableFragment');
 const RelayRecordProxy = require('./RelayRecordProxy');
 const invariant = require('invariant');
 
@@ -195,6 +197,50 @@ class RelayRecordSourceProxy implements RecordSourceProxy {
     return readUpdatableFragment(
       fragment,
       fragmentReference,
+      this,
+      this._missingFieldHandlers,
+    );
+  }
+
+  createWithFragment<TFragmentType, TData>(
+    dataID: DataID,
+    fragment: WritableFragment<TFragmentType, TData>,
+    args?: Variables,
+  ): TData {
+    // Get the fragment definition to extract the type
+    const {getFragment} = require('../query/GraphQLTag');
+    const writableFragment = getFragment(fragment);
+    const typeName = writableFragment.type;
+
+    // Create the record
+    this.create(dataID, typeName);
+
+    // Read and return the writable proxy
+    const result = readWritableFragment(
+      fragment,
+      dataID,
+      args,
+      this,
+      this._missingFieldHandlers,
+    );
+
+    invariant(
+      result != null,
+      'RelayRecordSourceProxy#createWithFragment(): Expected the created record to be readable.',
+    );
+
+    return result;
+  }
+
+  getWithFragment<TFragmentType, TData>(
+    dataID: DataID,
+    fragment: WritableFragment<TFragmentType, TData>,
+    args?: Variables,
+  ): ?TData {
+    return readWritableFragment(
+      fragment,
+      dataID,
+      args,
       this,
       this._missingFieldHandlers,
     );

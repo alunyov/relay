@@ -28,6 +28,7 @@ mod validate_server_only_directives;
 mod validate_static_args;
 mod validate_unused_fragment_variables;
 mod validate_unused_variables;
+mod validate_writable_directive;
 
 pub use deprecated_fields::deprecated_fields;
 pub use deprecated_fields::deprecated_fields_for_executable_definition;
@@ -55,3 +56,5 @@ pub use validate_static_args::validate_static_args;
 pub use validate_unused_fragment_variables::validate_unused_fragment_variables;
 pub use validate_unused_variables::ValidateUnusedVariables;
 pub use validate_unused_variables::validate_unused_variables;
+pub use validate_writable_directive::validate_writable_directive;
+pub use validate_writable_directive::WRITABLE_DIRECTIVE;

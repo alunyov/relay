@@ -48,6 +48,7 @@ import type {
   UpdatableFragment,
   UpdatableQuery,
   Variables,
+  WritableFragment,
 } from '../util/RelayRuntimeTypes';
 import type {TRelayFieldError} from './RelayErrorTrie';
 import type {
@@ -538,6 +539,17 @@ export interface RecordSourceProxy {
     fragment: UpdatableFragment<TFragmentType, TData>,
     fragmentReference: HasUpdatableSpread<TFragmentType>,
   ): UpdatableData<TData>;
+  // Writable fragment APIs
+  createWithFragment<TFragmentType, TData>(
+    dataID: DataID,
+    fragment: WritableFragment<TFragmentType, TData>,
+    args?: Variables,
+  ): TData;
+  getWithFragment<TFragmentType, TData>(
+    dataID: DataID,
+    fragment: WritableFragment<TFragmentType, TData>,
+    args?: Variables,
+  ): ?TData;
 }
 
 export interface ReadOnlyRecordSourceProxy {

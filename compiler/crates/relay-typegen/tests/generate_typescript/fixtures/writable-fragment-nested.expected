@@ -1,0 +1,29 @@
+==================================== INPUT ====================================
+fragment UserWithProfile on User @writable {
+  name
+  profilePicture {
+    uri
+    width
+    height
+  }
+}
+==================================== OUTPUT ===================================
+import { FragmentRefs } from "relay-runtime";
+export type UserWithProfile$data = {
+  name: string | null | undefined;
+  get profilePicture(): {
+    height: number | null | undefined;
+    uri: string | null | undefined;
+    width: number | null | undefined;
+  } | null | undefined;
+  set profilePicture(value: {
+    height: number | null | undefined;
+    uri: string | null | undefined;
+    width: number | null | undefined;
+  } | null | undefined);
+  readonly " $fragmentType": "UserWithProfile";
+};
+export type UserWithProfile$key = {
+  readonly " $data"?: UserWithProfile$data;
+  readonly $updatableFragmentSpreads: FragmentRefs<"UserWithProfile">;
+};

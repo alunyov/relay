@@ -1,0 +1,12 @@
+# expected-to-throw
+fragment MyFragment on Node @writable {
+  id
+  ... on User {
+    __typename
+    name
+  }
+  ... on Page {
+    __typename
+    name
+  }
+}

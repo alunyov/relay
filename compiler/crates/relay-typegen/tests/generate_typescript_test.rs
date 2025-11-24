@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @generated SignedSource<<1903a7cf2db933f9227f3b83bb115fb5>>
+ * @generated SignedSource<<3e68ae6bace8243be9917c4ba580275d>>
  */
 
 mod generate_typescript;
@@ -711,3 +711,11 @@ async fn updatable_operation_type_refinement() {
     let expected = include_str!("generate_typescript/fixtures/updatable-operation-type-refinement.expected");
     test_fixture(transform_fixture, file!(), "updatable-operation-type-refinement.graphql", "generate_typescript/fixtures/updatable-operation-type-refinement.expected", input, expected).await;
 }
+
+#[tokio::test]
+async fn writable_fragment_nested() {
+    let input = include_str!("generate_typescript/fixtures/writable-fragment-nested.graphql");
+    let expected = include_str!("generate_typescript/fixtures/writable-fragment-nested.expected");
+    test_fixture(transform_fixture, file!(), "writable-fragment-nested.graphql", "generate_typescript/fixtures/writable-fragment-nested.expected", input, expected).await;
+}
+

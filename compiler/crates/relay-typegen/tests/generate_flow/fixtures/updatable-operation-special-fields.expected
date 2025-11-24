@@ -20,7 +20,11 @@ export type UpdatableQuery$data = {|
     +aliased_typename: "User",
     +id: string,
   |},
-  set me(value: null | void): void,
+  set me(value: ?{
+    +__typename: "User",
+    +__id: string,
+    ...
+  }): void,
 |};
 export type UpdatableQuery = {|
   response: UpdatableQuery$data,

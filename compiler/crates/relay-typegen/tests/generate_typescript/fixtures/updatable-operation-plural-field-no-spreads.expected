@@ -10,7 +10,28 @@ export type UpdatableQuery$data = {
   get nodes(): ReadonlyArray<{
     readonly id: string;
   } | null | undefined> | null | undefined;
-  set nodes(value: []);
+  set nodes(value: ReadonlyArray<{
+    readonly __typename: "Comment";
+    readonly __id: string;
+  } | {
+    readonly __typename: "Feedback";
+    readonly __id: string;
+  } | {
+    readonly __typename: "FetchableType";
+    readonly __id: string;
+  } | {
+    readonly __typename: "Page";
+    readonly __id: string;
+  } | {
+    readonly __typename: "PhotoStory";
+    readonly __id: string;
+  } | {
+    readonly __typename: "Story";
+    readonly __id: string;
+  } | {
+    readonly __typename: "User";
+    readonly __id: string;
+  }>);
 };
 export type UpdatableQuery = {
   response: UpdatableQuery$data;

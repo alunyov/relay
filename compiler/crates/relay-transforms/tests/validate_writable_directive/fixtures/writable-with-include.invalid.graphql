@@ -1,0 +1,6 @@
+# expected-to-throw
+fragment UserFields on User @writable {
+  id
+  name @include(if: $includeIt)
+  email
+}

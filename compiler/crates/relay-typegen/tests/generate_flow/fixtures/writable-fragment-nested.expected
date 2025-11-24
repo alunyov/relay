@@ -1,0 +1,31 @@
+==================================== INPUT ====================================
+fragment UserWithProfile on User @writable {
+  name
+  profilePicture {
+    uri
+    width
+    height
+  }
+}
+==================================== OUTPUT ===================================
+import type { FragmentType } from "relay-runtime";
+declare export opaque type UserWithProfile$fragmentType: FragmentType;
+export type UserWithProfile$data = {|
+  name: ?string,
+  get profilePicture(): ?{|
+    height: ?number,
+    uri: ?string,
+    width: ?number,
+  |},
+  set profilePicture(value: ?{|
+    height: ?number,
+    uri: ?string,
+    width: ?number,
+  |}): void,
+  +$fragmentType: UserWithProfile$fragmentType,
+|};
+export type UserWithProfile$key = {
+  +$data?: UserWithProfile$data,
+  +$updatableFragmentSpreads: UserWithProfile$fragmentType,
+  ...
+};

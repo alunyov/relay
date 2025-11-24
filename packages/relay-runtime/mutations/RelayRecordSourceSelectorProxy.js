@@ -27,6 +27,7 @@ import type {
   UpdatableFragment,
   UpdatableQuery,
   Variables,
+  WritableFragment,
 } from '../util/RelayRuntimeTypes';
 import type RelayRecordSourceMutator from './RelayRecordSourceMutator';
 
@@ -154,6 +155,22 @@ class RelayRecordSourceSelectorProxy implements RecordSourceSelectorProxy {
       this,
       this._missingFieldHandlers,
     );
+  }
+
+  createWithFragment<TFragmentType, TData>(
+    dataID: DataID,
+    fragment: WritableFragment<TFragmentType, TData>,
+    args?: Variables,
+  ): TData {
+    return this.__recordSource.createWithFragment(dataID, fragment, args);
+  }
+
+  getWithFragment<TFragmentType, TData>(
+    dataID: DataID,
+    fragment: WritableFragment<TFragmentType, TData>,
+    args?: Variables,
+  ): ?TData {
+    return this.__recordSource.getWithFragment(dataID, fragment, args);
   }
 }
 

@@ -41,9 +41,21 @@ export type UpdatableQuery$data = {|
         ...
       }): void,
     |},
-    set actor(value: null | void): void,
+    set actor(value: ?({
+      +__typename: "Page",
+      +__id: string,
+      ...
+    } | {
+      +__typename: "User",
+      +__id: string,
+      ...
+    })): void,
   |},
-  set me(value: null | void): void,
+  set me(value: ?{
+    +__typename: "User",
+    +__id: string,
+    ...
+  }): void,
 |};
 export type UpdatableQuery = {|
   response: UpdatableQuery$data,

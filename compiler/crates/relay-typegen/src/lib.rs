@@ -31,6 +31,7 @@ use relay_config::ProjectConfig;
 pub use relay_config::TypegenConfig;
 pub use relay_config::TypegenLanguage;
 use relay_transforms::UPDATABLE_DIRECTIVE;
+use relay_transforms::WRITABLE_DIRECTIVE;
 use schema::SDLSchema;
 pub use typegen_state::FragmentLocations;
 pub use write::has_raw_response_type_directive;
@@ -146,13 +147,19 @@ fn generate_fragment_type_exports_section_impl(
     fragment_locations: &FragmentLocations,
     is_extra_artifact_branch_module: bool,
 ) -> String {
+    let is_updatable = fragment_definition
+            .directives
+            .named(*UPDATABLE_DIRECTIVE)
+            .is_some();
+    let is_writable = fragment_definition
+            .directives
+            .named(*WRITABLE_DIRECTIVE)
+            .is_some();
     let typegen_context = TypegenContext::new(
         schema,
         project_config,
-        fragment_definition
-            .directives
-            .named(*UPDATABLE_DIRECTIVE)
-            .is_some(),
+        is_updatable || is_writable,
+        is_writable,
         fragment_definition.name.map(|x| x.0),
         fragment_locations,
         TypegenOptions {
@@ -176,13 +183,19 @@ pub fn generate_named_validator_export(
     project_config: &ProjectConfig,
     fragment_locations: &FragmentLocations,
 ) -> String {
+    let is_writable = fragment_definition
+            .directives
+            .named(*WRITABLE_DIRECTIVE)
+            .is_some();
     let typegen_context = TypegenContext::new(
         schema,
         project_config,
         fragment_definition
             .directives
             .named(*UPDATABLE_DIRECTIVE)
-            .is_some(),
+            .is_some()
+            || is_writable,
+        is_writable,
         fragment_definition.name.map(|x| x.0),
         fragment_locations,
         TypegenOptions {
@@ -220,6 +233,7 @@ pub fn generate_operation_type_exports_section(
             .directives
             .named(*UPDATABLE_DIRECTIVE)
             .is_some(),
+        false, // operations can only be @updatable, not @writable
         WithLocation::new(
             typegen_operation.name.location,
             typegen_operation.name.item.0,
@@ -261,6 +275,7 @@ pub fn generate_split_operation_type_exports_section(
             .directives
             .named(*UPDATABLE_DIRECTIVE)
             .is_some(),
+        false, // operations can only be @updatable, not @writable
         WithLocation::new(
             typegen_operation.name.location,
             typegen_operation.name.item.0,
@@ -295,6 +310,7 @@ struct TypegenContext<'a> {
     fragment_locations: &'a FragmentLocations,
     has_unified_output: bool,
     generating_updatable_types: bool,
+    generating_writable_types: bool,
     definition_source_location: WithLocation<StringKey>,
     typegen_options: TypegenOptions,
 }
@@ -304,6 +320,7 @@ impl<'a> TypegenContext<'a> {
         schema: &'a SDLSchema,
         project_config: &'a ProjectConfig,
         generating_updatable_types: bool,
+        generating_writable_types: bool,
         definition_source_location: WithLocation<StringKey>,
         fragment_locations: &'a FragmentLocations,
         typegen_options: TypegenOptions,
@@ -314,6 +331,7 @@ impl<'a> TypegenContext<'a> {
             fragment_locations,
             has_unified_output: project_config.output.is_some(),
             generating_updatable_types,
+            generating_writable_types,
             definition_source_location,
             typegen_options,
         }

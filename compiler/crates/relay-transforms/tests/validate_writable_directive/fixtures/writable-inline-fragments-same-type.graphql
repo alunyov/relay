@@ -1,0 +1,7 @@
+fragment UserFragment on Node @writable {
+  id
+  ... on User {
+    __typename
+    name
+  }
+}

@@ -31,7 +31,35 @@ export type UpdatableQuery$data = {|
     // value in case none of the concrete values match.
     +__typename: "%other",
   |}),
-  set node(value: null | void): void,
+  set node(value: ?({
+    +__typename: "Comment",
+    +__id: string,
+    ...
+  } | {
+    +__typename: "Feedback",
+    +__id: string,
+    ...
+  } | {
+    +__typename: "FetchableType",
+    +__id: string,
+    ...
+  } | {
+    +__typename: "Page",
+    +__id: string,
+    ...
+  } | {
+    +__typename: "PhotoStory",
+    +__id: string,
+    ...
+  } | {
+    +__typename: "Story",
+    +__id: string,
+    ...
+  } | {
+    +__typename: "User",
+    +__id: string,
+    ...
+  })): void,
 |};
 export type UpdatableQuery = {|
   response: UpdatableQuery$data,

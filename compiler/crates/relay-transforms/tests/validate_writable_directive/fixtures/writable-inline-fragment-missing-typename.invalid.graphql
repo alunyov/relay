@@ -1,0 +1,8 @@
+# expected-to-throw
+fragment NodeFields on Node @writable {
+  id
+  ... on User {
+    name
+    email
+  }
+}

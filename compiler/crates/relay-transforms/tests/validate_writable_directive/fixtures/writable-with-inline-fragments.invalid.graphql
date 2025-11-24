@@ -1,0 +1,13 @@
+# expected-to-throw
+fragment NodeFields on Node @writable {
+  id
+  ... on User {
+    __typename
+    name
+    actorCount
+  }
+  ... on Page {
+    __typename
+    canViewerComment
+  }
+}

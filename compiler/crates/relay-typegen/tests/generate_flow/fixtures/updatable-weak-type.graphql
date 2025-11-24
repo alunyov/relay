@@ -1,0 +1,8 @@
+query UpdatableWeakTypeQuery @updatable {
+  me {
+    profilePicture {
+      uri
+      width
+    }
+  }
+}

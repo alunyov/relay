@@ -1445,7 +1445,12 @@ fn selections_to_babel(
         }
     }
 
-    if should_emit_discriminated_union(concrete_type, &by_concrete_type, &base_fields) {
+    if should_emit_discriminated_union(
+        concrete_type,
+        &by_concrete_type,
+        &base_fields,
+        typegen_context.generating_updatable_types,
+    ) {
         get_discriminated_union_ast(
             by_concrete_type,
             &base_fields,
@@ -1667,9 +1672,19 @@ fn should_emit_discriminated_union(
     concrete_type: &Type,
     by_concrete_type: &IndexMap<Type, Vec<TypeSelection>>,
     base_fields: &IndexMap<StringKey, TypeSelection>,
+    generating_updatable_types: bool,
 ) -> bool {
     if by_concrete_type.is_empty() || !concrete_type.is_abstract_type() {
         return false;
+    }
+
+    // For updatable/writable fragments, we need discriminated unions when inline fragments are present
+    // even if there are common base fields, as long as all inline fragments have __typename.
+    // This is because updatable types cannot have optional fields.
+    if generating_updatable_types {
+        return by_concrete_type
+            .values()
+            .all(|selections| has_typename_selection(selections));
     }
 
     base_fields.values().all(TypeSelection::is_typename)
@@ -1902,6 +1917,9 @@ fn make_prop(
                     custom_error_import,
                 );
 
+                // Clone getter_object_props for potential use in setter (for weak types)
+                let getter_object_props_for_setter = getter_object_props.clone();
+
                 let getter_return_value =
                     transform_type_reference_into_ast(&linked_field.node_type, |type_| {
                         return_ast_in_object_case(
@@ -1914,17 +1932,168 @@ fn make_prop(
                     });
 
                 let setter_parameter = if just_fragments.is_empty() {
-                    if linked_field.node_type.is_list() {
-                        AST::RawType(intern!("[]"))
-                    } else {
-                        match typegen_context.project_config.typegen_config.language {
-                            TypegenLanguage::Flow | TypegenLanguage::JavaScript => {
-                                AST::RawType(intern!("null | void"))
+                    let concrete_type = linked_field.node_type.inner();
+
+                    let setter_object = if typegen_context.generating_writable_types {
+                        // @writable fragments: Determine if this is a "strong type" (has id field) or "weak type" (no id field)
+                        // - Strong types: only allow linking to existing records via {__typename, __id}
+                        // - Weak types: allow inline creation by setting actual fields
+                        let has_id_field = typegen_context.schema.named_field(concrete_type, "id".intern()).is_some();
+
+                        if has_id_field {
+                            // Strong type: only accept {__typename, __id} for linking to existing records
+                            // For abstract types (interface/union), generate a union of all concrete types
+                            if concrete_type.is_abstract_type() {
+                                let possible_types: Vec<Type> = match concrete_type {
+                                    Type::Interface(id) => {
+                                        let interface = typegen_context.schema.interface(id);
+                                        interface.implementing_objects.iter().map(|obj_id| Type::Object(*obj_id)).collect()
+                                    }
+                                    Type::Union(id) => {
+                                        let union = typegen_context.schema.union(id);
+                                        union.members.iter().map(|obj_id| Type::Object(*obj_id)).collect()
+                                    }
+                                    _ => vec![]
+                                };
+
+                                // Generate union of all concrete type variants
+                                let variants: Vec<AST> = possible_types.iter().map(|concrete_type| {
+                                    let type_name = typegen_context.schema.get_type_name(*concrete_type);
+                                    let typename_prop = Prop::KeyValuePair(KeyValuePairProp {
+                                        key: "__typename".intern(),
+                                        value: AST::StringLiteral(StringLiteral(type_name)),
+                                        read_only: true,
+                                        optional: false,
+                                    });
+
+                                    let id_prop = Prop::KeyValuePair(KeyValuePairProp {
+                                        key: "__id".intern(),
+                                        value: AST::String,
+                                        read_only: true,
+                                        optional: false,
+                                    });
+
+                                    AST::InexactObject(InexactObject::new(vec![
+                                        typename_prop,
+                                        id_prop,
+                                    ]))
+                                }).collect();
+
+                                AST::Union(SortedASTList::new(variants))
+                            } else {
+                                // Concrete strong type
+                                let type_name = typegen_context.schema.get_type_name(concrete_type);
+                                let typename_prop = Prop::KeyValuePair(KeyValuePairProp {
+                                    key: "__typename".intern(),
+                                    value: AST::StringLiteral(StringLiteral(type_name)),
+                                    read_only: true,
+                                    optional: false,
+                                });
+
+                                let id_prop = Prop::KeyValuePair(KeyValuePairProp {
+                                    key: "__id".intern(),
+                                    value: AST::String,
+                                    read_only: true,
+                                    optional: false,
+                                });
+
+                                AST::InexactObject(InexactObject::new(vec![
+                                    typename_prop,
+                                    id_prop,
+                                ]))
                             }
-                            TypegenLanguage::TypeScript => {
-                                AST::RawType(intern!("null | undefined"))
-                            }
+                        } else {
+                            // Weak type: accept the actual object fields for inline creation
+                            // Use the same object shape as the getter
+                            return_ast_in_object_case(
+                                typegen_context,
+                                encountered_enums,
+                                custom_scalars,
+                                getter_object_props_for_setter,
+                                &concrete_type,
+                            )
                         }
+                    } else {
+                        // @updatable fragments/operations: Use {__typename, __id} for strong types,
+                        // full object shape for weak types (same as @writable but always check for id field)
+                        let has_id_field = typegen_context.schema.named_field(concrete_type, "id".intern()).is_some();
+
+                        if has_id_field {
+                            // Has id field: use {__typename, __id}
+                            if concrete_type.is_abstract_type() {
+                                let possible_types: Vec<Type> = match concrete_type {
+                                    Type::Interface(id) => {
+                                        let interface = typegen_context.schema.interface(id);
+                                        interface.implementing_objects.iter().map(|obj_id| Type::Object(*obj_id)).collect()
+                                    }
+                                    Type::Union(id) => {
+                                        let union = typegen_context.schema.union(id);
+                                        union.members.iter().map(|obj_id| Type::Object(*obj_id)).collect()
+                                    }
+                                    _ => vec![]
+                                };
+
+                                let variants: Vec<AST> = possible_types.iter().map(|concrete_type| {
+                                    let type_name = typegen_context.schema.get_type_name(*concrete_type);
+                                    let typename_prop = Prop::KeyValuePair(KeyValuePairProp {
+                                        key: "__typename".intern(),
+                                        value: AST::StringLiteral(StringLiteral(type_name)),
+                                        read_only: true,
+                                        optional: false,
+                                    });
+
+                                    let id_prop = Prop::KeyValuePair(KeyValuePairProp {
+                                        key: "__id".intern(),
+                                        value: AST::String,
+                                        read_only: true,
+                                        optional: false,
+                                    });
+
+                                    AST::InexactObject(InexactObject::new(vec![
+                                        typename_prop,
+                                        id_prop,
+                                    ]))
+                                }).collect();
+
+                                AST::Union(SortedASTList::new(variants))
+                            } else {
+                                // Concrete type with id
+                                let type_name = typegen_context.schema.get_type_name(concrete_type);
+                                let typename_prop = Prop::KeyValuePair(KeyValuePairProp {
+                                    key: "__typename".intern(),
+                                    value: AST::StringLiteral(StringLiteral(type_name)),
+                                    read_only: true,
+                                    optional: false,
+                                });
+
+                                let id_prop = Prop::KeyValuePair(KeyValuePairProp {
+                                    key: "__id".intern(),
+                                    value: AST::String,
+                                    read_only: true,
+                                    optional: false,
+                                });
+
+                                AST::InexactObject(InexactObject::new(vec![
+                                    typename_prop,
+                                    id_prop,
+                                ]))
+                            }
+                        } else {
+                            // No id field: use full object shape
+                            return_ast_in_object_case(
+                                typegen_context,
+                                encountered_enums,
+                                custom_scalars,
+                                getter_object_props_for_setter,
+                                &concrete_type,
+                            )
+                        }
+                    };
+
+                    if linked_field.node_type.is_list() {
+                        AST::ReadOnlyArray(Box::new(setter_object))
+                    } else {
+                        AST::Nullable(Box::new(setter_object))
                     }
                 } else {
                     let setter_parameter = AST::Union(
